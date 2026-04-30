@@ -246,6 +246,7 @@
         for(let i=0; i<25; i++) runners.push(new IntegratedRunner());
 
         async function initAudio() {
+            if (isAudioReady) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -255,9 +256,26 @@
                 source.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 isAudioReady = true;
-            } catch (e) {}
+                console.log("🔊 Audio SymbiOSis Activo");
+            } catch (e) {
+                console.error("🎤 Acceso al micro denegado o bloqueado");
+            }
         }
+
+        // Múltiples disparadores para despertar el audio
         window.addEventListener('mousedown', initAudio);
+        window.addEventListener('mousemove', initAudio, { once: true });
+        window.addEventListener('touchstart', initAudio);
+        
+        // Intento automático al cargar
+        setTimeout(initAudio, 1000);
+        
+        // Bucle de reintento si el contexto está suspendido
+        setInterval(() => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, 1000);
 
         async function updateStats() {
             try {

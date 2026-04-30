@@ -69,7 +69,12 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
-os.chdir(os.path.expanduser('~/Library/Application Support/HectorSaver'))
+# Detectar la carpeta donde está el script para servir archivos desde ahí
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(BASE_DIR)
+
 socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer((HOST, PORT), MyHandler) as httpd:
+    print(f"🚀 SymbiOSis Engine activo en {HOST}:{PORT}")
+    print(f"📁 Sirviendo archivos desde: {BASE_DIR}")
     httpd.serve_forever()

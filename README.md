@@ -1,4 +1,4 @@
-# 🧬 SymbiOSis: El Ecosistema del Criterio 🌌
+# 🧬 SymbiOSis: Mi Parke de Diversiones 🎢🌌
 
 > "Un Soñador con Poca RAM, pero con una visión que no cabe en 64GB." 👨🏻‍💻
 

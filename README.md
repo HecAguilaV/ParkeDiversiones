@@ -1,21 +1,21 @@
-# 🧬 SymbiOSis: The HectorPark 🎢🌌
+# 🤓 The HectorPark 🎢🌌
 
 > **"¡Bienvenidos a The HectorPark, el lugar donde los sueños tienen más prioridad que la RAM!"** 👨🏻‍💻✨
 
-Este proyecto no es solo un conjunto de salvapantallas; es mi **rincón de experimentación visual y filosófica**. Aquí es donde el hardware de mi Mac, el código y mis creencias convergen para crear algo más que píxeles: una experiencia de simbiosis.
-
-## 🧠 La Filosofía SymbiOSis
-Para mí, la tecnología no debe ser un monólogo de la máquina, sino un diálogo. Este ecosistema nace bajo la idea del **Sistema Operativo Pedagógico**: un modelo donde la IA y el ser humano no compiten, sino que colaboran bajo la "fricción deliberada" del juicio humano.
+Este proyecto es mi **rincón de experimentación visual y creativa**. Aquí es donde el hardware de mi Mac, el código y el diseño convergen para crear algo más que píxeles: una experiencia vibrante y dinámica.
 
 ## 🚀 ¿Qué hay en esta sinfonía?
 
 ### 1. HÉCTOR: Orbital Symphony (v3.9) 📉🌡️
+
 Mi monitor diario. No solo me dice cuánta RAM me queda (que suele ser poca), sino que visualiza el pulso térmico y la carga de mi sistema con una estética inspirada en *Tron Legacy*. Es el hardware cobrando vida propia.
 
 ### 2. Faith: Verdades Eternas 📖✨
+
 Porque no solo de pan (ni de bytes) vive el hombre. He creado un espacio minimalista para reflexionar sobre verdades bíblicas y pensamientos de gigantes como **Spurgeon, Sproul, San Agustín e Ireneo de Lyon**. Es el recordatorio de lo que realmente importa cuando la pantalla se apaga.
 
 ### 3. El Reveal Épico 🛡️🎬
+
 Un diseño cinemático basado en mi logo real. Representa la evolución: desde la construcción básica hasta la red neuronal que alimenta el proyecto pedagógico **SymbiOSis**.
 
 ## 🛠️ Bajo el Capó (Las Tripas del Parke) 🎡
@@ -24,21 +24,21 @@ Aquí es donde ocurre la magia técnica, ¡pero con luces de neón! 🌈✨
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![macOS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=apple&logoColor=white)
 
-*   **🐍 Motor de Datos (Backend)**: Un script en `python3` que actúa como el operario del Parke, extrayendo telemetría real (`top`, `sysctl`, `df`) para que los juegos tengan vida.
-*   **🎨 Pinceles Digitales (Frontend)**: Nada de frameworks aburridos. Aquí usamos **HTML5 puro**, **Vanilla CSS** (con mucho glow) y **JS nativo**. 🍭
-*   **🔌 Conexión Maestra**: Todo se comunica vía una API JSON local que corre en el puerto `8080`.
-*   **🎢 El Vagón**: Diseñado para correr sobre el cargador **WebViewScreenSaver** en macOS.
+* **🐍 Motor de Datos (Backend)**: Un script en `python3` que actúa como el operario del Parke, extrayendo telemetría real (`top`, `sysctl`, `df`) para que los juegos tengan vida.
+* **🎨 Pinceles Digitales (Frontend)**: Nada de frameworks aburridos. Aquí usamos **HTML5 puro**, **Vanilla CSS** (con mucho glow) y **JS nativo**. 🍭
+* **🔌 Conexión Maestra**: Todo se comunica vía una API JSON local que corre en el puerto `8080`.
+* **🎢 El Vagón**: Diseñado para correr sobre el cargador **WebViewScreenSaver** en macOS.
 
 ## 🚀 ¿Cómo hacerlo latir?
+
 1. Despliega los archivos en `~/Library/Application Support/HectorSaver/`.
 2. Lanza el motor de datos: `python3 server.py`.
 3. Configura tu cargador de salvapantallas para apuntar a `http://localhost:8080/index.html`.
 
 ---
-**SymbiOSis** es un proyecto vivo. Es mi bitácora de vuelo en este viaje de aprendizaje constante.
 
 🔗 [Mi Repositorio de Ideas](https://github.com/HecAguilaV/The-HectorPark)
 
-*Hecho con fe, café y muchas horas de debug.*  
-**Héctor Águila - 2026**  
+*Hecho con fe, café y muchas horas de debug.***Héctor Águila - 2026**
+
 > **Un Soñador con Poca RAM 👨🏻‍💻**

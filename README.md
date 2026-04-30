@@ -5,7 +5,7 @@
 Este proyecto no es solo un conjunto de salvapantallas; es mi **rincón de experimentación visual y filosófica**. Aquí es donde el hardware de mi Mac, el código y mis creencias convergen para crear algo más que píxeles: una experiencia de simbiosis.
 
 ## 🧠 La Filosofía SymbiOSis
-Para mí, la tecnología no debe ser un monólogo de la máquina, sino un diálogo. Este ecosistema nace bajo la idea del **Sistema Operativo del Criterio**: un modelo donde la IA y el ser humano no compiten, sino que colaboran bajo la "fricción deliberada" del juicio humano.
+Para mí, la tecnología no debe ser un monólogo de la máquina, sino un diálogo. Este ecosistema nace bajo la idea del **Sistema Operativo Pedagógico**: un modelo donde la IA y el ser humano no compiten, sino que colaboran bajo la "fricción deliberada" del juicio humano.
 
 ## 🚀 ¿Qué hay en esta sinfonía?
 

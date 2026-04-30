@@ -1,39 +1,37 @@
-# 🧬 SymbiOSis: HÉCTOR Orbital Symphony 🌌
+# 🧬 SymbiOSis: El Ecosistema del Criterio 🌌
 
-Un ecosistema de protectores de pantalla dinámicos de alta fidelidad basados en HTML/JS para macOS, diseñados para fusionar arte digital, monitoreo de hardware y visualización de audio en tiempo real.
+> "Un Soñador con Poca RAM, pero con una visión que no cabe en 64GB." 👨🏻‍💻
 
-## 🚀 La Joya de la Corona: HÉCTOR Orbital Symphony
-El diseño principal (**v3.8 Nerd Edition**) es un híbrido sofisticado que combina:
-- **Telemetría de Hardware en Tiempo Real**: 
-  - **CPU**: Carga del sistema con **Thermal Engine** integrado (estimación de temperatura dinámica con alertas de color).
-  - **RAM**: Monitoreo detallado (Usada / Total).
-  - **SWAP**: Indicador de memoria de intercambio para Power Users.
-  - **SSD**: Estado de almacenamiento del disco principal.
-- **Visualizador de Audio 3D**: Espectro circular reactivo que pulsa y brilla con la música (requiere acceso al micrófono).
-- **Estética Tron Legacy/Ares**: 
-  - Fondo con rejilla 3D y perspectiva infinita.
-  - **Grid Runners**: Corredores de luz que recorren la pista siguiendo la geometría 3D.
-  - **Digital Rain**: Lluvia de bits cósmica que reacciona al bajo de la música.
-  - **Brillo Aditivo**: Iluminación neón de alta fidelidad (Electric Cyan & Ares Red).
+Este proyecto no es solo un conjunto de salvapantallas; es mi **rincón de experimentación visual y filosófica**. Aquí es donde el hardware de mi Mac, el código y mis creencias convergen para crear algo más que píxeles: una experiencia de simbiosis.
 
-## 🛠 Estructura del Proyecto
-- `index.html`: Controlador maestro. Configurado por defecto para cargar la *Sinfonía Orbital*.
-- `server.py`: El "Cerebro" del sistema. Provee una API JSON en `/stats` con toda la telemetría del Mac (CPU, RAM, SWAP, SSD, TEMP).
-- `designs/`: Galería de diseños adicionales (Matrix, SIGA Architecture, Zen, etc.).
+## 🧠 La Filosofía SymbiOSis
+Para mí, la tecnología no debe ser un monólogo de la máquina, sino un diálogo. Este ecosistema nace bajo la idea del **Sistema Operativo del Criterio**: un modelo donde la IA y el ser humano no compiten, sino que colaboran bajo la "fricción deliberada" del juicio humano.
 
-## 🚀 Instalación y Uso
-1. **Requisito Maestro**: Este proyecto es una aplicación web independiente, pero para usarlo como salvapantallas en macOS necesitas un cargador. Se recomienda el uso de **[WebViewScreenSaver](https://github.com/liquid-metal/WebViewScreenSaver)** (Licencia Apache 2.0).
-2. **Despliegue**: Copia los archivos de este repositorio a `~/Library/Application Support/HectorSaver/`.
-3. **Servidor**: Ejecuta `python3 server.py`. El servidor debe estar corriendo para que la telemetría (CPU, RAM, TEMP) funcione.
-4. **Configuración**: En los ajustes de tu salvapantallas web, apunta a la URL local:
-   `http://localhost:8080/index.html`
+## 🚀 ¿Qué hay en esta sinfonía?
 
-## 🧠 Telemetría Avanzada
-El sistema utiliza comandos nativos de macOS (`top`, `sysctl`, `df`) para extraer datos precisos sin necesidad de instalar herramientas de terceros, superando las restricciones de sandbox de macOS Sequoia.
+### 1. HÉCTOR: Orbital Symphony (v3.9) 📉🌡️
+Mi monitor diario. No solo me dice cuánta RAM me queda (que suele ser poca), sino que visualiza el pulso térmico y la carga de mi sistema con una estética inspirada en *Tron Legacy*. Es el hardware cobrando vida propia.
 
-## ⚖️ Licencia
-Este proyecto está bajo la Licencia **MIT**. Consulta el archivo `LICENSE` para más detalles.
+### 2. Faith: Verdades Eternas 📖✨
+Porque no solo de pan (ni de bytes) vive el hombre. He creado un espacio minimalista para reflexionar sobre verdades bíblicas y pensamientos de gigantes como **Spurgeon, Sproul, San Agustín e Ireneo de Lyon**. Es el recordatorio de lo que realmente importa cuando la pantalla se apaga.
+
+### 3. El Reveal Épico 🛡️🎬
+Un diseño cinemático basado en mi logo real. Representa la evolución: desde la construcción básica hasta la red neuronal que alimenta el proyecto pedagógico **SymbiOSis**.
+
+## 🛠 El "Bajo el Capó" (Tech Stack)
+*   **Backend**: Un servidor Python (`server.py`) que extrae la telemetría real de macOS (`top`, `sysctl`, `df`) para alimentar los diseños.
+*   **Frontend**: HTML5, Vanilla CSS y JS. Sin frameworks pesados, solo lógica pura y matemáticas.
+*   **Integración**: Diseñado para ser usado con **WebViewScreenSaver** en macOS.
+
+## 🚀 ¿Cómo hacerlo latir?
+1. Despliega los archivos en `~/Library/Application Support/HectorSaver/`.
+2. Lanza el motor de datos: `python3 server.py`.
+3. Configura tu cargador de salvapantallas para apuntar a `http://localhost:8080/index.html`.
 
 ---
-*Diseñado con pasión por la tecnología y el arte digital.*  
-**> Un Soñador con Poca RAM 👨🏻‍💻**
+**SymbiOSis** es un proyecto vivo. Es mi bitácora de vuelo en este viaje de aprendizaje constante.
+
+🔗 [Mi Repositorio de Ideas](https://github.com/HecAguilaV/ParkeDiversiones)
+
+*Hecho con fe, café y muchas horas de debug.*  
+**Héctor Águila - 2026**

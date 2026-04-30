@@ -1,6 +1,6 @@
-# 🧬 SymbiOSis: Mi Parke de Diversiones 🎢🌌
+# 🧬 SymbiOSis: The HectorPark 🎢🌌
 
-> "Un Soñador con Poca RAM, pero con una visión que no cabe en 64GB." 👨🏻‍💻
+> **"¡Bienvenidos a The HectorPark, el lugar donde los sueños tienen más prioridad que la RAM!"** 👨🏻‍💻✨
 
 Este proyecto no es solo un conjunto de salvapantallas; es mi **rincón de experimentación visual y filosófica**. Aquí es donde el hardware de mi Mac, el código y mis creencias convergen para crear algo más que píxeles: una experiencia de simbiosis.
 

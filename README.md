@@ -18,10 +18,14 @@ Porque no solo de pan (ni de bytes) vive el hombre. He creado un espacio minimal
 ### 3. El Reveal Épico 🛡️🎬
 Un diseño cinemático basado en mi logo real. Representa la evolución: desde la construcción básica hasta la red neuronal que alimenta el proyecto pedagógico **SymbiOSis**.
 
-## 🛠 El "Bajo el Capó" (Tech Stack)
-*   **Backend**: Un servidor Python (`server.py`) que extrae la telemetría real de macOS (`top`, `sysctl`, `df`) para alimentar los diseños.
-*   **Frontend**: HTML5, Vanilla CSS y JS. Sin frameworks pesados, solo lógica pura y matemáticas.
-*   **Integración**: Diseñado para ser usado con **WebViewScreenSaver** en macOS.
+## 🛠️ Bajo el Capó (Las Tripas del Parke) 🎡
+
+Aquí es donde ocurre la magia técnica, ¡pero con luces de neón! 🌈✨
+
+*   **🐍 Motor de Datos (Backend)**: Un script en `python3` que actúa como el operario del Parke, extrayendo telemetría real (`top`, `sysctl`, `df`) para que los juegos tengan vida.
+*   **🎨 Pinceles Digitales (Frontend)**: Nada de frameworks aburridos. Aquí usamos **HTML5 puro**, **Vanilla CSS** (con mucho glow) y **JS nativo**. 🍭
+*   **🔌 Conexión Maestra**: Todo se comunica vía una API JSON local que corre en el puerto `8080`.
+*   **🎢 El Vagón**: Diseñado para correr sobre el cargador **WebViewScreenSaver** en macOS.
 
 ## 🚀 ¿Cómo hacerlo latir?
 1. Despliega los archivos en `~/Library/Application Support/HectorSaver/`.

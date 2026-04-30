@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>HECTOR: Orbital Symphony v3.7 (Optimized)</title>
+    <style>
+        :root {
+            --cyan: #00ffff;
+            --magenta: #bc13fe;
+            --ares: #ff0033;
+            --bg: #010103;
+        }
+
+        body { background: var(--bg); margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: #fff; }
+        canvas { position: absolute; top: 0; left: 0; }
+        
+        #bouncing-unit {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            will-change: transform, left, top;
+        }
+
+        #core-monitor {
+            width: 270px;
+            height: 270px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.1);
+            text-align: center;
+            z-index: 20;
+        }
+
+        #header {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 6px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px var(--cyan);
+            color: #fff;
+        }
+
+        .stat-label {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 9px;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            margin: 1px 0 4px 0;
+            color: #fff;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .bar-bg {
+            width: 150px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--magenta));
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px var(--cyan);
+        }
+
+        #dreaming {
+            font-size: 8px;
+            letter-spacing: 5px;
+            margin-top: 6px;
+            color: var(--cyan);
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--cyan);
+        }
+
+        #signature-fixed {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--cyan);
+            font-family: monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-shadow: 0 0 15px var(--cyan);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    
+    <div id="signature-fixed">> Un Soñador con Poca RAM 👨🏻‍💻</div>
+
+    <div id="bouncing-unit">
+        <canvas id="viz-canvas"></canvas>
+        <div id="core-monitor">
+            <div id="header">HÉCTOR</div>
+            
+            <div class="stat-label">CPU <span id="temp-tag" style="margin-left: 10px; color: var(--cyan);">[<span id="temp-val">0</span>°C]</span></div>
+            <div class="stat-value"><span id="cpu-val">0%</span></div>
+            <div class="bar-bg"><div id="cpu-bar" class="bar-fill"></div></div>
+            
+            <div class="stat-label">RAM</div>
+            <div class="stat-value"><span id="ram-val">0 / 0</span></div>
+            <div class="bar-bg"><div id="ram-bar" class="bar-fill" style="background: linear-gradient(90deg, var(--magenta), var(--cyan));"></div></div>
+
+            <div class="stat-label">SWAP</div>
+            <div class="stat-value"><span id="swap-val">0 / 0</span></div>
+            <div class="bar-bg"><div id="swap-bar" class="bar-fill" style="background: #ff8800; box-shadow: 0 0 15px #ff8800;"></div></div>
+
+            <div class="stat-label">SSD</div>
+            <div class="stat-value"><span id="ssd-val">0 / 0</span></div>
+            <div class="bar-bg"><div id="ssd-bar" class="bar-fill" style="background: #fff; box-shadow: 0 0 15px #fff;"></div></div>
+
+            <div id="dreaming">DREAMING...</div>
+        </div>
+    </div>
+
+    <script>
+        const unit = document.getElementById('bouncing-unit');
+        const vizCanvas = document.getElementById('viz-canvas');
+        const bgCanvas = document.getElementById('bg-canvas');
+        const vizCtx = vizCanvas.getContext('2d');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        vizCanvas.width = 450;
+        vizCanvas.height = 450;
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+
+        let posX = Math.random() * (window.innerWidth - 450);
+        let posY = Math.random() * (window.innerHeight - 450);
+        let velX = 1.3;
+        let velY = 1.3;
+
+        let audioContext, analyser, dataArray;
+        let isAudioReady = false;
+        let gridOffset = 0;
+        let rainParticles = [];
+        let runners = [];
+        let globalAngle = 0;
+
+        for (let i = 0; i < 50; i++) {
+            rainParticles.push({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                len: Math.random() * 15 + 10,
+                speed: Math.random() * 2 + 2,
+                opacity: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        class IntegratedRunner {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.type = Math.random() > 0.6 ? 'v' : 'h';
+                this.trackIndex = Math.floor(Math.random() * 16) - 8;
+                this.progress = Math.random();
+                this.speed = 0.003 + Math.random() * 0.004;
+                const isAres = Math.random() < 0.15;
+                this.hue = isAres ? 0 : 180;
+                this.sat = 100;
+                this.light = 60;
+                this.history = [];
+                this.maxHistory = 12; // Optimizado: Estela mas corta para mejor rendimiento
+            }
+            update(intensity) {
+                this.history.unshift({x: this.x, y: this.y, size: this.size});
+                if (this.history.length > this.maxHistory) this.history.pop();
+                this.progress += this.speed + (intensity * 0.012);
+                if (this.progress > 1) this.reset();
+                const centerX = bgCanvas.width / 2;
+                const horizonY = bgCanvas.height * 0.2;
+                const gridSize = 50;
+                if (this.type === 'v') {
+                    const startX = centerX + this.trackIndex * gridSize * 2.5;
+                    this.x = startX + (centerX - startX) * this.progress;
+                    this.y = bgCanvas.height - (bgCanvas.height - horizonY) * this.progress;
+                    this.size = 5 * (1 - this.progress);
+                } else {
+                    const yPos = bgCanvas.height - (bgCanvas.height - horizonY) * this.progress;
+                    const widthAtY = (yPos - horizonY) / (bgCanvas.height - horizonY) * bgCanvas.width * 2.5;
+                    this.x = centerX - widthAtY/2 + ((globalAngle + this.trackIndex) % 1) * widthAtY;
+                    this.y = yPos;
+                    this.size = 3;
+                }
+            }
+            draw() {
+                if (this.history.length < 2) return;
+                const opacity = (1 - ((this.y - (bgCanvas.height * 0.2)) / bgCanvas.height)) * 0.9;
+                bgCtx.globalCompositeOperation = 'lighter';
+                bgCtx.beginPath();
+                bgCtx.strokeStyle = `hsla(${this.hue}, ${this.sat}%, ${this.light}%, ${opacity * 0.5})`;
+                bgCtx.lineWidth = this.size * 1.5;
+                bgCtx.moveTo(this.x, this.y);
+                for(let i=0; i<this.history.length; i++) bgCtx.lineTo(this.history[i].x, this.history[i].y);
+                bgCtx.stroke();
+                bgCtx.fillStyle = `hsla(${this.hue}, ${this.sat}%, 90%, ${opacity})`;
+                bgCtx.shadowBlur = 15;
+                bgCtx.shadowColor = `hsl(${this.hue}, ${this.sat}%, 50%)`;
+                bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill();
+                bgCtx.shadowBlur = 0;
+                bgCtx.globalCompositeOperation = 'source-over';
+            }
+        }
+
+        for(let i=0; i<25; i++) runners.push(new IntegratedRunner());
+
+        async function initAudio() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                isAudioReady = true;
+            } catch (e) {}
+        }
+        window.addEventListener('mousedown', initAudio);
+
+        async function updateStats() {
+            try {
+                const res = await fetch('http://localhost:8080/stats');
+                const data = await res.json();
+                
+                // CPU & TEMP
+                document.getElementById('cpu-val').textContent = `${data.cpu_usage.toFixed(1)}%`;
+                document.getElementById('cpu-bar').style.width = `${data.cpu_usage}%`;
+                
+                const tVal = data.temp;
+                const tEl = document.getElementById('temp-val');
+                const tTag = document.getElementById('temp-tag');
+                tEl.textContent = tVal;
+                
+                // Color dinámico de temperatura
+                if (tVal > 65) {
+                    tTag.style.color = '#ff0033'; // Ares Red
+                    tTag.style.textShadow = '0 0 10px #ff0033';
+                } else if (tVal > 48) {
+                    tTag.style.color = '#ffaa00'; // Warning Orange
+                    tTag.style.textShadow = '0 0 10px #ffaa00';
+                } else {
+                    tTag.style.color = '#00ffff'; // Cool Cyan
+                    tTag.style.textShadow = '0 0 10px #00ffff';
+                }
+
+                // RAM
+                const totalMem = (parseFloat(data.used_mem) + parseFloat(data.free_mem)).toFixed(1) + (data.used_mem.includes('G') ? 'G' : 'M');
+                document.getElementById('ram-val').textContent = `${data.used_mem} / ${totalMem}`;
+                let freeVal = parseFloat(data.free_mem);
+                if (data.free_mem.includes('M')) freeVal /= 1024;
+                let usedVal = parseFloat(data.used_mem);
+                if (data.used_mem.includes('M')) usedVal /= 1024;
+                let ramPercent = (usedVal / (usedVal + freeVal)) * 100;
+                document.getElementById('ram-bar').style.width = `${ramPercent}%`;
+                
+                // SWAP
+                document.getElementById('swap-val').textContent = `${data.swap_used} / ${data.swap_total}`;
+                document.getElementById('swap-bar').style.width = `${data.swap_usage}%`;
+
+                // SSD
+                const totalSsd = data.ssd_total;
+                const usedSsd = (parseFloat(data.ssd_total) - parseFloat(data.ssd_free)).toFixed(1) + 'G';
+                document.getElementById('ssd-val').textContent = `${usedSsd} / ${totalSsd}`;
+                document.getElementById('ssd-bar').style.width = `${data.ssd_usage}%`;
+                
+            } catch (e) {}
+        }
+        setInterval(updateStats, 2000);
+
+        function drawBackground() {
+            bgCtx.fillStyle = '#010103';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+            const bass = isAudioReady ? dataArray[2] : 0;
+            const intensity = bass / 255;
+
+            // Lluvia (Optimizada)
+            bgCtx.lineWidth = 1;
+            rainParticles.forEach(p => {
+                bgCtx.strokeStyle = `rgba(0, 255, 255, ${p.opacity + intensity * 0.3})`;
+                bgCtx.beginPath(); bgCtx.moveTo(p.x, p.y); bgCtx.lineTo(p.x, p.y + p.len); bgCtx.stroke();
+                p.y += p.speed + intensity * 7;
+                if (p.y > bgCanvas.height) { p.y = -p.len; p.x = Math.random() * bgCanvas.width; }
+            });
+
+            const gridSize = 50;
+            gridOffset = (gridOffset + 0.5 + intensity * 2) % gridSize;
+            const centerX = bgCanvas.width / 2;
+            const horizonY = bgCanvas.height * 0.2;
+
+            bgCtx.globalCompositeOperation = 'lighter';
+            for (let y = 0; y < bgCanvas.height; y += gridSize) {
+                const pos = y + gridOffset;
+                const opacity = (y / bgCanvas.height) * 0.25;
+                bgCtx.strokeStyle = `rgba(0, 255, 255, ${opacity + intensity * 0.1})`;
+                bgCtx.beginPath(); bgCtx.moveTo(0, pos); bgCtx.lineTo(bgCanvas.width, pos); bgCtx.stroke();
+            }
+            for (let x = -bgCanvas.width; x < bgCanvas.width * 3; x += gridSize * 2.5) {
+                const opacity = 0.12 + intensity * 0.1;
+                bgCtx.strokeStyle = `rgba(0, 255, 255, ${opacity})`;
+                bgCtx.beginPath(); bgCtx.moveTo(centerX, horizonY); bgCtx.lineTo(x, bgCanvas.height); bgCtx.stroke();
+            }
+            bgCtx.globalCompositeOperation = 'source-over';
+
+            runners.forEach(r => { r.update(intensity); r.draw(); });
+        }
+
+        function drawVisualizer() {
+            vizCtx.clearRect(0, 0, 450, 450);
+            if (!isAudioReady) return;
+            analyser.getByteFrequencyData(dataArray);
+            const centerX = 225; const centerY = 225; const radius = 120; const bars = 60;
+            for (let i = 0; i < bars; i++) {
+                const barHeight = (dataArray[i] / 255) * 80;
+                const angle = (i * 2 * Math.PI) / bars;
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+                const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+                const hue = 180 + (i / bars) * 100;
+                vizCtx.strokeStyle = `hsla(${hue}, 100%, 60%, 0.9)`;
+                vizCtx.lineWidth = 5; vizCtx.lineCap = 'round';
+                vizCtx.beginPath(); vizCtx.moveTo(x1, y1); vizCtx.lineTo(x2, y2); vizCtx.stroke();
+            }
+        }
+
+        function animate() {
+            globalAngle += 0.005;
+            drawBackground();
+            posX += velX; posY += velY;
+            if (posX <= 0 || posX >= window.innerWidth - 450) velX *= -1;
+            if (posY <= 0 || posY >= window.innerHeight - 450) velY *= -1;
+            unit.style.left = posX + 'px'; unit.style.top = posY + 'px';
+            drawVisualizer();
+            if (isAudioReady) {
+                const bass = dataArray[2];
+                unit.style.transform = `scale(${1 + bass/1200})`;
+                unit.style.filter = `drop-shadow(0 0 ${bass/10}px rgba(0, 255, 255, 0.5))`;
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+        window.onresize = () => { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; };
+    </script>
+</body>
+</html>

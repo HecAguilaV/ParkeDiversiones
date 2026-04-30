@@ -1,0 +1,13 @@
+node_modules/
+.DS_Store
+*.log
+__pycache__/
+.env
+.vscode/
+.idea/
+.gemini/
+scratch/
+artifacts/
+temp/
+WebViewScreenSaver.saver/
+designs/symbiosis_epic.html

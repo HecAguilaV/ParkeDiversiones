@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis Audio Visualizer</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #00ffcc;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #interaction-prompt {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #00ffcc;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ffcc;
+            transition: opacity 0.5s;
+        }
+
+        #interaction-prompt h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        #interaction-prompt p {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="interaction-prompt">
+        <h1>SYNC AUDIO</h1>
+        <p>Haz clic para activar el visualizador</p>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const prompt = document.getElementById('interaction-prompt');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let source;
+        let initialized = false;
+
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+                
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                prompt.style.opacity = '0';
+                setTimeout(() => prompt.remove(), 500);
+                initialized = true;
+                draw();
+            } catch (err) {
+                console.error("Error al acceder al micro:", err);
+                alert("Por favor, permite el acceso al micrófono para el visualizador.");
+            }
+        }
+
+        prompt.addEventListener('click', initAudio);
+
+        const particles = [];
+        for (let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                speedX: Math.random() * 3 - 1.5,
+                speedY: Math.random() * 3 - 1.5,
+                color: '#00ffcc'
+            });
+        }
+
+        function draw() {
+            if (!initialized) return;
+            requestAnimationFrame(draw);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 150;
+
+            // Dibujar espectro circular
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = dataArray[i] * 1.5;
+                const angle = (i / dataArray.length) * Math.PI * 2;
+                
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+                const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+
+                const hue = (i / dataArray.length) * 360;
+                ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+
+            // Partículas reactivas
+            const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+            particles.forEach(p => {
+                p.x += p.speedX * (volume / 20);
+                p.y += p.speedY * (volume / 20);
+
+                if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * (volume / 50), 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Núcleo central
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + (volume / 5), 0, Math.PI * 2);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0, 255, 204, 0.1)';
+            ctx.fill();
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

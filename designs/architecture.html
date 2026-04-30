@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis: Architecture Blueprint</title>
+    <style>
+        body { background: #0a0e14; margin: 0; overflow: hidden; color: #00d2ff; font-family: 'Courier New', Courier, monospace; }
+        canvas { position: absolute; top: 0; left: 0; }
+        .ui-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            font-size: 10px;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+        .concept-tag {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px #00d2ff;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+    </style>
+</head>
+<body>
+    <div class="ui-overlay">
+        SYSTEM_DESIGN_PHASE: ACTIVE<br>
+        SOLUTIONS_ARCHITECT: HECTOR<br>
+        STATUS: DESIGNING_FUTURE
+    </div>
+    <canvas id="blueprint"></canvas>
+
+    <script>
+        const canvas = document.getElementById('blueprint');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const components = [];
+        const connections = [];
+        const principles = ["SCALABILITY", "RESILIENCE", "SECURITY", "INTEROPERABILITY", "CLEAN CODE", "DDD", "HEXAGONAL"];
+
+        class Component {
+            constructor(type) {
+                this.x = Math.random() * (canvas.width - 200) + 100;
+                this.y = Math.random() * (canvas.height - 200) + 100;
+                this.type = type; // cloud, service, db, api
+                this.w = 100;
+                this.h = 60;
+                this.opacity = 0;
+            }
+
+            draw() {
+                if (this.opacity < 1) this.opacity += 0.02;
+                ctx.globalAlpha = this.opacity;
+                ctx.strokeStyle = "#00d2ff";
+                ctx.lineWidth = 2;
+                
+                if (this.type === 'cloud') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.strokeRect(this.x - 20, this.y - 15, 40, 30);
+                } else if (this.type === 'db') {
+                    ctx.strokeRect(this.x - 25, this.y - 30, 50, 60);
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - 25, this.y - 15); ctx.lineTo(this.x + 25, this.y - 15);
+                    ctx.moveTo(this.x - 25, this.y + 15); ctx.lineTo(this.x + 25, this.y + 15);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeRect(this.x - 40, this.y - 30, 80, 60);
+                }
+
+                ctx.fillStyle = "#00d2ff";
+                ctx.font = "8px monospace";
+                ctx.fillText(this.type.toUpperCase(), this.x - 20, this.y + 45);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function createBlueprint() {
+            const types = ['cloud', 'service', 'db', 'api', 'gateway'];
+            for(let i=0; i<8; i++) {
+                components.push(new Component(types[Math.floor(Math.random()*types.length)]));
+            }
+            
+            // Conectar componentes aleatoriamente
+            for(let i=0; i<components.length; i++) {
+                const targets = [Math.floor(Math.random()*components.length)];
+                targets.forEach(t => {
+                    if(i !== t) connections.push({from: components[i], to: components[t], p: 0});
+                });
+            }
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let i=0; i<canvas.height; i+=40) {
+                ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width, i); ctx.stroke();
+            }
+        }
+
+        let pulsePos = 0;
+        function animate() {
+            ctx.fillStyle = "#0a0e14";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawGrid();
+
+            connections.forEach(conn => {
+                ctx.strokeStyle = "rgba(0, 210, 255, 0.2)";
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(conn.from.x, conn.from.y);
+                ctx.lineTo(conn.to.x, conn.to.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Pulso de datos
+                conn.p += 0.005;
+                if(conn.p > 1) conn.p = 0;
+                const px = conn.from.x + (conn.to.x - conn.from.x) * conn.p;
+                const py = conn.from.y + (conn.to.y - conn.from.y) * conn.p;
+                ctx.fillStyle = "#fff";
+                ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+            });
+
+            components.forEach(c => c.draw());
+
+            requestAnimationFrame(animate);
+        }
+
+        createBlueprint();
+        animate();
+
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    </script>
+</body>
+</html>

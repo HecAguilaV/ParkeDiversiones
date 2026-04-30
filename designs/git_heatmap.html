@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis GitHub Ultra</title>
+    <style>
+        body { background: #010409; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; color: #c9d1d9; overflow: hidden; }
+        .container { background: #0d1117; width: 900px; padding: 30px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 20px 50px rgba(0,0,0,0.7); display: grid; grid-template-columns: 250px 1fr; gap: 30px; }
+        
+        /* Left Sidebar */
+        .sidebar { border-right: 1px solid #30363d; padding-right: 30px; }
+        .avatar { width: 100%; border-radius: 50%; border: 4px solid #238636; margin-bottom: 20px; box-shadow: 0 0 20px rgba(35, 134, 54, 0.3); }
+        .user-name { font-size: 22px; color: #fff; margin: 0; }
+        .user-login { color: #8b949e; font-size: 16px; margin-bottom: 20px; }
+        .bio { font-size: 13px; line-height: 1.4; margin-bottom: 20px; font-style: italic; }
+        
+        /* Main Content */
+        .main { display: flex; flex-direction: column; gap: 20px; }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat-box { background: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
+        .stat-value { display: block; font-size: 22px; font-weight: 800; color: #39d353; }
+        .stat-label { font-size: 10px; text-transform: uppercase; color: #8b949e; }
+
+        .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #8b949e; margin-bottom: 10px; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
+        
+        /* Languages Bar */
+        .lang-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .lang-tag { font-size: 11px; padding: 4px 10px; border-radius: 10px; background: #238636; color: white; }
+
+        /* Commit Ticker */
+        .activity-box { background: #010409; border: 1px solid #238636; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; position: relative; overflow: hidden; }
+        .activity-box::before { content: "LATEST_EVENT"; position: absolute; top: 0; right: 10px; font-size: 8px; color: #238636; }
+        .commit-msg { color: #39d353; }
+
+        .grid { display: grid; grid-template-columns: repeat(52, 10px); grid-template-rows: repeat(7, 10px); gap: 3px; }
+        .cell { width: 10px; height: 10px; border-radius: 2px; background: #21262d; }
+        .cell.level-1 { background: #0e4429; }
+        .cell.level-2 { background: #006d32; }
+        .cell.level-3 { background: #26a641; }
+        .cell.level-4 { background: #39d353; box-shadow: 0 0 8px #39d353; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <img id="avatar" class="avatar" src="">
+            <h1 id="name" class="user-name">Cargando...</h1>
+            <div id="login" class="user-login">@hector</div>
+            <div id="bio" class="bio">"La RAM es poca, pero los sueños son infinitos."</div>
+            
+            <div class="section-title">TOP LENGUAJES</div>
+            <div id="languages" class="lang-list">
+                <span class="lang-tag">JS</span>
+                <span class="lang-tag">TS</span>
+                <span class="lang-tag">PY</span>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="stats-row">
+                <div class="stat-box">
+                    <span id="repos" class="stat-value">0</span>
+                    <span class="stat-label">REPOS</span>
+                </div>
+                <div class="stat-box">
+                    <span id="followers" class="stat-value">0</span>
+                    <span class="stat-label">FOLLOWERS</span>
+                </div>
+                <div class="stat-box">
+                    <span id="gists" class="stat-value">0</span>
+                    <span class="stat-label">GISTS</span>
+                </div>
+                <div id="rank-box" class="stat-box">
+                    <span class="stat-value">S+</span>
+                    <span class="stat-label">RANK</span>
+                </div>
+            </div>
+
+            <div class="section-title">ACTIVIDAD RECIENTE</div>
+            <div class="activity-box">
+                <div id="latest-commit" class="commit-msg">> Escaneando satélites de GitHub...</div>
+            </div>
+
+            <div class="section-title">CONTRIBUCIONES (YEARLY)</div>
+            <div class="grid" id="heatmap"></div>
+        </div>
+    </div>
+
+    <script>
+        const GITHUB_USER = 'HecAguilaV';
+
+        async function init() {
+            await fetchProfile();
+            await fetchActivity();
+            await fetchLanguages();
+            createHeatmap();
+        }
+
+        async function fetchProfile() {
+            const res = await fetch(`https://api.github.com/users/${GITHUB_USER}`);
+            const d = await res.json();
+            document.getElementById('avatar').src = d.avatar_url;
+            document.getElementById('name').textContent = d.name || d.login;
+            document.getElementById('login').textContent = `@${d.login}`;
+            document.getElementById('bio').textContent = d.bio || "Dreaming in Code";
+            document.getElementById('repos').textContent = d.public_repos;
+            document.getElementById('followers').textContent = d.followers;
+            document.getElementById('gists').textContent = d.public_gists;
+        }
+
+        async function fetchActivity() {
+            try {
+                const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/events/public`);
+                const events = await res.json();
+                const lastPush = events.find(e => e.type === 'PushEvent');
+                if (lastPush) {
+                    const msg = lastPush.payload.commits[0].message;
+                    const repo = lastPush.repo.name.split('/')[1];
+                    document.getElementById('latest-commit').textContent = `[${repo}] ${msg}`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchLanguages() {
+            try {
+                const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=10`);
+                const repos = await res.json();
+                const langs = {};
+                repos.forEach(r => {
+                    if (r.language) langs[r.language] = (langs[r.language] || 0) + 1;
+                });
+                
+                const container = document.getElementById('languages');
+                container.innerHTML = '';
+                Object.keys(langs).sort((a,b) => langs[b] - langs[a]).slice(0, 5).forEach(l => {
+                    const span = document.createElement('span');
+                    span.className = 'lang-tag';
+                    span.textContent = l;
+                    container.appendChild(span);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function createHeatmap() {
+            const grid = document.getElementById('heatmap');
+            for (let i = 0; i < 52 * 7; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const rand = Math.random();
+                if (rand > 0.98) cell.className += ' level-4';
+                else if (rand > 0.92) cell.className += ' level-3';
+                else if (rand > 0.85) cell.className += ' level-2';
+                else if (rand > 0.75) cell.className += ' level-1';
+                grid.appendChild(cell);
+            }
+        }
+
+        init();
+        setInterval(init, 10 * 60 * 1000); // Actualizar cada 10 min para no quemar la API
+    </script>
+</body>
+</html>

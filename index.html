@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis Master Control</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
+        #selector {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px;
+            font-size: 10px;
+            font-family: monospace;
+        }
+        body:hover #selector { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="selector">MODO: CARGANDO...</div>
+    <div style="position: absolute; bottom: 10px; right: 20px; z-index: 100; color: rgba(255,255,255,0.2); font-family: monospace; font-size: 9px; letter-spacing: 1px;">> Un Soñador con Poca RAM 👨🏻‍💻</div>
+    <iframe id="main-frame" src=""></iframe>
+
+    <script>
+        // ==========================================
+        // ⚙️ CONFIGURACIÓN DE SYMBIOSIS
+        // ==========================================
+        // Opciones: 'random' o el path del archivo (ej: 'designs/matrix.html')
+        const MODE = 'designs/music.html'; 
+        // ==========================================
+
+        const designs = [
+            'designs/matrix.html',
+            'designs/ram_monitor.html',
+            'designs/visualizer.html',
+            'designs/clock.html',
+            'designs/starfield.html',
+            'designs/cyber_map.html',
+            'designs/zen.html',
+            'designs/git_heatmap.html',
+            'designs/evolution.html',
+            'designs/architecture.html',
+            'designs/siga_architecture.html',
+            'designs/music.html'
+        ];
+
+        const frame = document.getElementById('main-frame');
+        const selector = document.getElementById('selector');
+
+        function setDesign() {
+            let design;
+            if (MODE === 'random') {
+                const randomIdx = Math.floor(Math.random() * designs.length);
+                design = designs[randomIdx];
+                selector.textContent = `SYMBIOSIS CORE: RANDOM (${design.toUpperCase()})`;
+            } else {
+                design = MODE;
+                selector.textContent = `SYMBIOSIS CORE: FIXED (${design.toUpperCase()})`;
+            }
+            frame.src = design;
+        }
+
+        // Solo activar el intervalo si estamos en modo random
+        if (MODE === 'random') {
+            setInterval(setDesign, 10 * 60 * 1000);
+        }
+        
+        setDesign();
+    </script>
+</body>
+</html>

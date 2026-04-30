@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis: El Legado de la Evolución</title>
+    <style>
+        body { background: #000; margin: 0; overflow: hidden; color: #fff; font-family: 'Segoe UI', 'Roboto', sans-serif; }
+        canvas { position: absolute; top: 0; left: 0; }
+        
+        #era-label {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            font-weight: 200;
+            opacity: 0;
+            transition: opacity 2s, transform 2s;
+            z-index: 10;
+        }
+
+        #master-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            opacity: 0;
+            transition: opacity 3s, transform 3s;
+            z-index: 20;
+            text-align: center;
+        }
+
+        #master-logo span { color: #fff; text-shadow: 0 0 30px #fff, 0 0 60px #fff; }
+        #master-logo .symbi { color: rgba(255,255,255,0.3); }
+        
+        .project-tag {
+            position: absolute;
+            font-size: 14px;
+            font-family: monospace;
+            color: #39d353;
+            opacity: 0;
+            transition: opacity 1s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="era-label">CONSTRUCCIÓN</div>
+    <div id="master-logo">
+        <span class="symbi">Symbi</span><span>OS</span>is
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const eraLabel = document.getElementById('era-label');
+        const masterLogo = document.getElementById('master-logo');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const eras = [
+            { name: "Construcción", color: "#e67e22" },
+            { name: "Tecnología", color: "#3498db" },
+            { name: "Desarrollo", color: "#2ecc71" },
+            { name: "Libros", color: "#f1c40f" },
+            { name: "IA Chat", color: "#9b59b6" },
+            { name: "Agentes", color: "#1abc9c" },
+            { name: "Automatización", color: "#e74c3c" },
+            { name: "Arquitectura", color: "#34495e" },
+            { name: "Cloud Infra", color: "#ecf0f1" },
+            { name: "Machine Learning", color: "#8e44ad" },
+            { name: "Big Data", color: "#2980b9" },
+            { name: "Aprendizaje Constante", color: "#d35400" },
+            { name: "Evolución Imparable", color: "#fff" }
+        ];
+
+        const projects = [
+            "SIGA", "El Arca", "Voz de Cristal", 
+            "Paper: Simbiosis Humano-IA", 
+            "Libro: Conversaciones a Oscuras",
+            "Ingeniero Informático (Software Dev)"
+        ];
+
+        let currentEra = 0;
+        let nodes = [];
+        let projectNodes = [];
+        let state = 'EVOLVING'; // EVOLVING -> LEGACY
+
+        class Node {
+            constructor(era, isProject = false, name = "") {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.2;
+                this.vy = (Math.random() - 0.5) * 1.2;
+                this.radius = isProject ? 5 : Math.random() * 3 + 1;
+                this.color = era.color;
+                this.name = name;
+                this.isProject = isProject;
+                this.angle = Math.random() * Math.PI * 2;
+                this.distance = 150 + Math.random() * 200;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                if (this.isProject || state === 'LEGACY') {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = this.color;
+                }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                if (this.isProject && state === 'LEGACY') {
+                    ctx.font = "12px monospace";
+                    ctx.fillStyle = "rgba(255,255,255,0.7)";
+                    ctx.fillText(this.name, this.x + 10, this.y + 5);
+                }
+            }
+
+            update() {
+                if (state === 'EVOLVING') {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                } else {
+                    // Orbitar el centro
+                    this.angle += 0.005;
+                    this.x = canvas.width/2 + Math.cos(this.angle) * this.distance;
+                    this.y = canvas.height/2 + Math.sin(this.angle) * this.distance;
+                }
+            }
+        }
+
+        function switchEra() {
+            if (currentEra < eras.length) {
+                eraLabel.style.opacity = '0';
+                setTimeout(() => {
+                    const era = eras[currentEra];
+                    eraLabel.textContent = era.name;
+                    eraLabel.style.color = era.color;
+                    eraLabel.style.opacity = '0.8';
+                    for(let i=0; i<6; i++) nodes.push(new Node(era));
+                    currentEra++;
+                    setTimeout(switchEra, 4000);
+                }, 1000);
+            } else {
+                startLegacyPhase();
+            }
+        }
+
+        function startLegacyPhase() {
+            state = 'LEGACY';
+            eraLabel.style.opacity = '0';
+            masterLogo.style.opacity = '1';
+            masterLogo.style.transform = 'translate(-50%, -50%) scale(1)';
+            
+            // Crear nodos de proyecto
+            projects.forEach((p, i) => {
+                const pNode = new Node({color: '#39d353'}, true, p);
+                pNode.distance = 200 + (i * 40);
+                nodes.push(pNode);
+            });
+        }
+
+        function drawConnections() {
+            nodes.forEach((n1, i) => {
+                nodes.slice(i+1).forEach(n2 => {
+                    const dx = n1.x - n2.x;
+                    const dy = n1.y - n2.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    const limit = state === 'LEGACY' ? 200 : 120;
+
+                    if (dist < limit) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = n1.color;
+                        ctx.globalAlpha = (1 - dist/limit) * 0.3;
+                        ctx.moveTo(n1.x, n1.y);
+                        ctx.lineTo(n2.x, n2.y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                });
+                
+                // Conectar al centro en fase Legacy
+                if (state === 'LEGACY') {
+                    const dx = n1.x - canvas.width/2;
+                    const dy = n1.y - canvas.height/2;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 400) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                        ctx.moveTo(n1.x, n1.y);
+                        ctx.lineTo(canvas.width/2, canvas.height/2);
+                        ctx.stroke();
+                    }
+                }
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            nodes.forEach(n => { n.update(); n.draw(); });
+            drawConnections();
+            requestAnimationFrame(animate);
+        }
+
+        switchEra();
+        animate();
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SIGA: Integrated Pipeline</title>
+    <style>
+        :root {
+            --bg: #080b12;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body { background: var(--bg); margin: 0; overflow: hidden; color: #fff; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header { 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .siga-logo {
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin: 0;
+        }
+        .siga-logo span.blue { color: #7dd3fc; text-shadow: 0 0 20px #7dd3fc; }
+        .siga-logo span.cyan { color: #22d3ee; text-shadow: 0 0 30px #22d3ee; }
+        .subtitle { font-size: 9px; text-transform: uppercase; letter-spacing: 5px; opacity: 0.4; margin-top: 5px; }
+
+        .footer { display: flex; justify-content: center; position: absolute; bottom: 40px; width: 100%; left: 0; }
+        .signature {
+            font-family: monospace;
+            font-size: 11px;
+            color: #7dd3fc;
+            background: var(--glass);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            letter-spacing: 1px;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pipeline-canvas"></canvas>
+    
+    <div id="ui-layer">
+        <div class="header" id="logo-header">
+            <h1 class="siga-logo"><span class="blue">SI</span><span class="cyan">GA</span></h1>
+            <div class="subtitle">Sistema Inteligente de Gestión de Activos</div>
+        </div>
+        <div class="footer">
+            <div class="signature">> Un Soñador con Poca RAM 👨🏻‍💻</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pipeline-canvas');
+        const ctx = canvas.getContext('2d');
+        const logoHeader = document.getElementById('logo-header');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let globalAngle = 0;
+
+        const nodes = [
+            { id: 'gateway', label: 'GATEWAY', tier: 1, dist: 180, angle: 0 },
+            { id: 'web', label: 'WEB APP', tier: 0, dist: 350, angle: Math.PI * 0.1 },
+            { id: 'mobile', label: 'MOBILE APP', tier: 0, dist: 350, angle: -Math.PI * 0.1 },
+            { id: 'auth', label: 'AUTH', tier: 1, dist: 240, angle: Math.PI * 0.5 },
+            { id: 'inv', label: 'INVENTORY', tier: 1, dist: 240, angle: Math.PI * 0.8 },
+            { id: 'sales', label: 'SALES', tier: 1, dist: 240, angle: Math.PI * 1.1 },
+            { id: 'agent', label: 'AGENT (AI)', tier: 1, dist: 240, angle: Math.PI * 1.4 },
+            { id: 'db', label: 'POSTGRESQL', tier: 1, dist: 240, angle: Math.PI * 1.8 },
+            { id: 'pubsub', label: 'PUB/SUB', tier: 2, dist: 400, angle: Math.PI * 0.4 },
+            { id: 'dataflow', label: 'DATAFLOW', tier: 2, dist: 400, angle: Math.PI * 0.7 },
+            { id: 'bq', label: 'BIGQUERY', tier: 2, dist: 400, angle: Math.PI * 1.3 },
+            { id: 'vertex', label: 'VERTEX AI', tier: 2, dist: 400, angle: Math.PI * 1.6 }
+        ];
+
+        const tierLabels = ["CLIENT_INGRESS", "DOMAIN_LOGIC", "INTELLIGENCE_GCP"];
+
+        const connections = [
+            { from: 'web', to: 'gateway' }, { from: 'mobile', to: 'gateway' },
+            { from: 'gateway', to: 'auth' }, { from: 'gateway', to: 'inv' },
+            { from: 'gateway', to: 'sales' }, { from: 'gateway', to: 'agent' },
+            { from: 'inv', to: 'db' }, { from: 'sales', to: 'pubsub' },
+            { from: 'pubsub', to: 'dataflow' }, { from: 'dataflow', to: 'bq' },
+            { from: 'bq', to: 'vertex' }
+        ];
+
+        const particles = [];
+        class Particle {
+            constructor(conn) {
+                this.conn = conn;
+                this.p = Math.random();
+                this.speed = 0.001 + Math.random() * 0.002;
+            }
+            draw() {
+                this.p += this.speed;
+                if (this.p > 1) this.p = 0;
+                const from = nodes.find(n => n.id === this.conn.from);
+                const to = nodes.find(n => n.id === this.conn.to);
+                const cpX = canvas.width/2;
+                const cpY = canvas.height/2;
+                const x = Math.pow(1-this.p, 2) * from.cx + 2 * (1-this.p) * this.p * cpX + Math.pow(this.p, 2) * to.cx;
+                const y = Math.pow(1-this.p, 2) * from.cy + 2 * (1-this.p) * this.p * cpY + Math.pow(this.p, 2) * to.cy;
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#22d3ee';
+                ctx.fill();
+            }
+        }
+
+        function drawTierLabels() {
+            [180, 240, 400].forEach((dist, i) => {
+                // Rotación mucho más lenta para lectura (0.2x de la velocidad global)
+                const slowAngle = -globalAngle * 0.2 + (i * Math.PI / 2);
+                const tx = canvas.width/2 + Math.cos(slowAngle) * (dist + 40);
+                const ty = canvas.height/2 + Math.sin(slowAngle) * (dist + 40);
+                
+                // Color dinámico sincronizado
+                const labelHue = 190 + Math.sin(globalAngle + i) * 30;
+                
+                ctx.save();
+                ctx.translate(tx, ty);
+                ctx.rotate(slowAngle + Math.PI/2);
+                ctx.fillStyle = `hsla(${labelHue}, 80%, 70%, 0.6)`;
+                ctx.font = "bold 11px Inter";
+                ctx.textAlign = "center";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `hsl(${labelHue}, 80%, 60%)`;
+                ctx.fillText(`[ TIER ${i}: ${tierLabels[i]} ]`, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function drawNodes() {
+            nodes.forEach(n => {
+                n.cx = canvas.width/2 + Math.cos(n.angle + globalAngle * (1 + n.tier * 0.5)) * n.dist;
+                n.cy = canvas.height/2 + Math.sin(n.angle + globalAngle * (1 + n.tier * 0.5)) * n.dist;
+
+                const hueOffset = Math.sin(globalAngle + n.angle) * 30;
+                const nodeColor = `hsl(${190 + hueOffset}, 80%, 60%)`;
+
+                ctx.beginPath();
+                ctx.arc(canvas.width/2, canvas.height/2, n.dist, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.03)';
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.strokeStyle = nodeColor;
+                ctx.beginPath();
+                ctx.roundRect(n.cx - 50, n.cy - 12, 100, 24, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 8px Inter";
+                ctx.textAlign = "center";
+                ctx.fillText(n.label, n.cx, n.cy + 3);
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = '#080b12';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            globalAngle += 0.002;
+            const floatY = Math.sin(globalAngle * 2) * 10;
+            logoHeader.style.transform = `translate(-50%, calc(-50% + ${floatY}px))`;
+            drawTierLabels();
+            drawNodes();
+            particles.forEach(p => p.draw());
+            requestAnimationFrame(animate);
+        }
+
+        connections.forEach(c => {
+            for(let i=0; i<3; i++) particles.push(new Particle(c));
+        });
+        animate();
+        window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    </script>
+</body>
+</html>

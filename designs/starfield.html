@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis Starfield</title>
+    <style>
+        body { background: #000; margin: 0; overflow: hidden; }
+        canvas { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+    <script>
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        let screen, stars, params = { speed: 2, number: 500, extinction: 4 };
+
+        setup();
+        window.onresize = setup;
+
+        function setup() {
+            screen = { w: window.innerWidth, h: window.innerHeight, c: [ window.innerWidth * 0.5, window.innerHeight * 0.5 ] };
+            canvas.width = screen.w;
+            canvas.height = screen.h;
+            stars = [];
+            for (let i = 0; i < params.number; i++) stars[i] = new Star();
+        }
+
+        function Star() {
+            this.x = Math.random() * screen.w;
+            this.y = Math.random() * screen.h;
+            this.z = Math.random() * screen.w;
+            this.move = function() {
+                this.z -= params.speed;
+                if (this.z <= 0) this.z = screen.w;
+            };
+            this.show = function() {
+                let x, y, s, rad;
+                x = (this.x - screen.c[0]) * (screen.w / this.z);
+                x = x + screen.c[0];
+                y = (this.y - screen.c[1]) * (screen.w / this.z);
+                y = y + screen.c[1];
+                s = screen.w / (this.z * params.extinction);
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.arc(x, y, s, 0, Math.PI * 2);
+                ctx.fill();
+            };
+        }
+
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, screen.w, screen.h);
+            stars.forEach(s => { s.move(); s.show(); });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body>
+</html>

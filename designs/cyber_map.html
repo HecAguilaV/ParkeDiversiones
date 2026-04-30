@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis Cyber Map</title>
+    <style>
+        body { background: #050a10; margin: 0; overflow: hidden; font-family: monospace; color: #00ffcc; }
+        canvas { position: absolute; top: 0; left: 0; }
+        .ui { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #00ffcc; }
+        .attack-log { position: absolute; bottom: 20px; left: 20px; z-index: 10; width: 300px; height: 200px; overflow: hidden; font-size: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-left: 3px solid #ff0055; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <strong>GLOBAL THREAT MONITOR</strong><br>
+        NODES ACTIVE: 14,293<br>
+        STATUS: SYMBIOSIS ENCRYPTED
+    </div>
+    <div class="attack-log" id="log"></div>
+    <canvas id="map"></canvas>
+    <script>
+        const canvas = document.getElementById('map');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const cities = [];
+        for(let i=0; i<30; i++) cities.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, name: "NODE_"+i});
+
+        const attacks = [];
+
+        function drawMap() {
+            ctx.fillStyle = "rgba(5, 10, 16, 0.2)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw cities
+            cities.forEach(c => {
+                ctx.fillStyle = "#00ffcc";
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, 2, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Random attack
+            if (Math.random() > 0.95) {
+                const from = cities[Math.floor(Math.random()*cities.length)];
+                const to = cities[Math.floor(Math.random()*cities.length)];
+                attacks.push({x: from.x, y: from.y, tx: to.x, ty: to.y, p: 0});
+                addLog(`[ATTACK] ${from.name} -> ${to.name} (BLOCKED)`);
+            }
+
+            attacks.forEach((a, i) => {
+                a.p += 0.02;
+                const cx = a.x + (a.tx - a.x) * a.p;
+                const cy = a.y + (a.ty - a.y) * a.p;
+                ctx.strokeStyle = "#ff0055";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(cx, cy);
+                ctx.stroke();
+                if (a.p >= 1) attacks.splice(i, 1);
+            });
+
+            requestAnimationFrame(drawMap);
+        }
+
+        const log = document.getElementById('log');
+        function addLog(text) {
+            const div = document.createElement('div');
+            div.textContent = `> ${text}`;
+            log.prepend(div);
+            if (log.childNodes.length > 15) log.removeChild(log.lastChild);
+        }
+
+        drawMap();
+    </script>
+</body>
+</html>

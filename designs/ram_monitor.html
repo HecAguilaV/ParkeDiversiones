@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis RAM Monitor</title>
+    <style>
+        body {
+            background: radial-gradient(circle, #000428 0%, #000000 100%);
+            color: #00d2ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #bouncing-box {
+            position: absolute;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .logo-img {
+            width: 100px;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 10px #00d2ff);
+        }
+
+        .ascii-logo {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 8px;
+            margin-top: 10px;
+            line-height: 1.1;
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .status-tag {
+            margin-top: 10px;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #ff0055;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        #bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 210, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            perspective: 500px;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-grid"></div>
+    <div id="bouncing-box">
+        <div class="logo-img" style="display: flex; align-items: center; justify-content: center; color: var(--magenta); font-weight: bold; font-family: monospace; border: 2px solid var(--magenta); background: rgba(255,0,255,0.1); border-radius: 10px; font-size: 14px;">SYM</div>
+        <div class="ascii-logo">
+ ██╗  ██╗███████╗ ██████╗████████╗ ██████╗ ██████╗ 
+ ██║  ██║██╔════╝██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗
+ ███████║█████╗  ██║        ██║   ██║   ██║██████╔╝
+ ██╔══██║██╔══╝  ██║        ██║   ██║   ██║██╔══██╗
+ ██║  ██║███████╗╚██████╗   ██║   ╚██████╔╝██║  ██║
+ ╚═╝  ╚═╝╚══════╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝</div>
+        <div class="stats" id="ram-text">CARGANDO SYMBIOSIS...</div>
+        <div class="status-tag" id="status-text">CALIBRANDO</div>
+    </div>
+
+    <script>
+        const box = document.getElementById('bouncing-box');
+        const ramText = document.getElementById('ram-text');
+        const statusText = document.getElementById('status-text');
+        
+        let x = Math.random() * (window.innerWidth - 300);
+        let y = Math.random() * (window.innerHeight - 200);
+        let dx = 2;
+        let dy = 2;
+        const colors = ['#00d2ff', '#ff0055', '#00ff41', '#ffcc00', '#9d00ff'];
+
+        function bounce() {
+            x += dx;
+            y += dy;
+
+            if (x + box.offsetWidth >= window.innerWidth || x <= 0) {
+                dx = -dx;
+                changeColor();
+            }
+            if (y + box.offsetHeight >= window.innerHeight || y <= 0) {
+                dy = -dy;
+                changeColor();
+            }
+
+            box.style.left = x + 'px';
+            box.style.top = y + 'px';
+
+            requestAnimationFrame(bounce);
+        }
+
+        function changeColor() {
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            box.style.borderColor = color;
+            box.style.boxShadow = `0 0 20px ${color}`;
+            box.style.color = color;
+            document.querySelectorAll('.logo-img').forEach(img => {
+                img.style.filter = `drop-shadow(0 0 10px ${color})`;
+            });
+        }
+
+        async function updateStats() {
+            try {
+                const response = await fetch('http://localhost:8080/stats');
+                const data = await response.json();
+                ramText.textContent = `USED: ${data.used} | FREE: ${data.free}`;
+                statusText.textContent = data.status;
+                statusText.style.background = data.status === 'DREAMING' ? '#ff0055' : '#00ff41';
+            } catch (e) {
+                ramText.textContent = "CONEXIÓN PERDIDA";
+            }
+        }
+
+        setInterval(updateStats, 2000);
+        updateStats();
+        bounce();
+
+        window.addEventListener('resize', () => {
+            x = Math.min(x, window.innerWidth - box.offsetWidth);
+            y = Math.min(y, window.innerHeight - box.offsetHeight);
+        });
+    </script>
+</body>
+</html>

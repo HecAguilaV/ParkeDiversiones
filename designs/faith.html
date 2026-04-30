@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SymbiOSis: Faith</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap');
+
+        body { 
+            background: #000; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            color: #fdfdfd; 
+            font-family: 'Playfair Display', serif; 
+            font-style: italic; 
+            overflow: hidden; 
+        }
+
+        .quote-container { 
+            text-align: center; 
+            max-width: 800px; 
+            z-index: 10; 
+            padding: 40px;
+        }
+
+        .quote { 
+            font-size: 2.2rem; 
+            line-height: 1.6; 
+            margin-bottom: 30px; 
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .author { 
+            font-size: 1.1rem; 
+            opacity: 0.4; 
+            letter-spacing: 6px; 
+            text-transform: uppercase; 
+            font-style: normal;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .active {
+            opacity: 1;
+        }
+
+        .bg-vignette { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: radial-gradient(circle at center, #111 0%, #000 100%); 
+            z-index: 1; 
+        }
+
+        #progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            width: 0%;
+            transition: width 10s linear;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-vignette"></div>
+    <div id="progress-bar"></div>
+    <div class="quote-container">
+        <div class="quote" id="quote"></div>
+        <div class="author" id="author"></div>
+    </div>
+
+    <script>
+        const quotes = [
+            {q: "Nos hiciste, Señor, para ti, y nuestro corazón está inquieto hasta que descanse en ti.", a: "San Agustín de Hipona"},
+            {q: "La gracia no se halla en la naturaleza, sino que la naturaleza es sanada por la gracia.", a: "San Agustín de Hipona"},
+            {q: "La gloria de Dios es el hombre plenamente vivo, y la vida del hombre es la visión de Dios.", a: "San Ireneo de Lyon"},
+            {q: "Prefiero hablar con Dios sobre los hombres, que con los hombres sobre Dios.", a: "Ch. Spurgeon"},
+            {q: "La soberanía de Dios es el fundamento de nuestra confianza.", a: "R.C. Sproul"},
+            {q: "Cristo no es alguien a quien seguir, sino alguien en quien vivir.", a: "John Stott"},
+            {q: "Todo lo que Dios hace es por Su gloria y para nuestro bien.", a: "John Piper"},
+            {q: "La Biblia no es un libro para ser analizado, sino para ser obedecido.", a: "John McArthur"},
+            {q: "El que se arrodilla ante Dios, puede estar de pie ante cualquier hombre.", a: "Matthew Henry"},
+            {q: "La santidad no es una opción, es un mandato.", a: "Joel Beeke"},
+            {q: "Con Cristo estoy juntamente crucificado, y ya no vivo yo, mas vive Cristo en mí.", a: "Apóstol Pablo"},
+            {q: "La verdad de Dios es la única base segura para la libertad humana.", a: "Miguel Núñez"},
+            {q: "La gracia no es solo el perdón, es el poder de Dios para transformarnos.", a: "Sugel Michelén"},
+            {q: "Si Dios es soberano, no hay una sola molécula en el universo que se mueva fuera de Su control.", a: "R.C. Sproul"},
+            {q: "La verdadera sabiduría comienza con el temor al Señor.", a: "Isaac Newton"},
+            {q: "Dame cien hombres que no teman más que al pecado y no deseen más que a Dios, y sacudiré las puertas del infierno.", a: "John Wesley"},
+            {q: "Un hombre con Dios siempre es mayoría.", a: "John Knox"},
+            {q: "La teología es la ciencia de vivir para Dios.", a: "William Ames"},
+            {q: "La obediencia a Dios siempre trae bendición, sin importar las consecuencias.", a: "Charles Stanley"}
+        ];
+
+        let idx = 0;
+        const qEl = document.getElementById('quote');
+        const aEl = document.getElementById('author');
+        const pEl = document.getElementById('progress-bar');
+
+        function update() {
+            qEl.classList.remove('active');
+            aEl.classList.remove('active');
+            pEl.style.transition = 'none';
+            pEl.style.width = '0%';
+            
+            setTimeout(() => {
+                const item = quotes[idx];
+                qEl.textContent = `"${item.q}"`;
+                aEl.textContent = item.a;
+                
+                qEl.classList.add('active');
+                aEl.classList.add('active');
+                
+                pEl.style.transition = 'width 10s linear';
+                pEl.style.width = '100%';
+                
+                idx = (idx + 1) % quotes.length;
+            }, 2000);
+        }
+
+        setInterval(update, 12000);
+        update();
+
+        window.onclick = update;
+    </script>
+</body>
+</html>

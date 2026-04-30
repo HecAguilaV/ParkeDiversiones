@@ -22,6 +22,8 @@ Un diseño cinemático basado en mi logo real. Representa la evolución: desde l
 
 Aquí es donde ocurre la magia técnica, ¡pero con luces de neón! 🌈✨
 
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![macOS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=apple&logoColor=white)
+
 *   **🐍 Motor de Datos (Backend)**: Un script en `python3` que actúa como el operario del Parke, extrayendo telemetría real (`top`, `sysctl`, `df`) para que los juegos tengan vida.
 *   **🎨 Pinceles Digitales (Frontend)**: Nada de frameworks aburridos. Aquí usamos **HTML5 puro**, **Vanilla CSS** (con mucho glow) y **JS nativo**. 🍭
 *   **🔌 Conexión Maestra**: Todo se comunica vía una API JSON local que corre en el puerto `8080`.
@@ -38,4 +40,5 @@ Aquí es donde ocurre la magia técnica, ¡pero con luces de neón! 🌈✨
 🔗 [Mi Repositorio de Ideas](https://github.com/HecAguilaV/ParkeDiversiones)
 
 *Hecho con fe, café y muchas horas de debug.*  
-**Héctor Águila - 2026**
+**Héctor Águila - 2026**  
+> **Un Soñador con Poca RAM 👨🏻‍💻**

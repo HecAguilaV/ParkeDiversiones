@@ -37,7 +37,7 @@ Aquí es donde ocurre la magia técnica, ¡pero con luces de neón! 🌈✨
 ---
 **SymbiOSis** es un proyecto vivo. Es mi bitácora de vuelo en este viaje de aprendizaje constante.
 
-🔗 [Mi Repositorio de Ideas](https://github.com/HecAguilaV/ParkeDiversiones)
+🔗 [Mi Repositorio de Ideas](https://github.com/HecAguilaV/The-HectorPark)
 
 *Hecho con fe, café y muchas horas de debug.*  
 **Héctor Águila - 2026**  

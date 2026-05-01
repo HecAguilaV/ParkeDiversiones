@@ -1,9 +1,37 @@
 import http.server
 import socketserver
 import json
-import subprocess
 import os
 import re
+import threading
+import pyaudio
+import numpy as np
+
+# Configuración de Audio
+CHUNK = 1024
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 44100
+audio_level = 0
+
+def audio_capture_thread():
+    global audio_level
+    p = pyaudio.PyAudio()
+    try:
+        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
+        while True:
+            data = stream.read(CHUNK, exception_on_overflow=False)
+            audio_data = np.frombuffer(data, dtype=np.int16)
+            # Calcular nivel RMS (volumen)
+            rms = np.sqrt(np.mean(audio_data**2))
+            audio_level = int(rms)
+    except Exception as e:
+        print(f"🎤 Error de Audio: {e}")
+    finally:
+        p.terminate()
+
+# Iniciar captura de audio en segundo plano
+threading.Thread(target=audio_capture_thread, daemon=True).start()
 
 # SEGURIDAD: Escuchar solo en localhost (127.0.0.1) para evitar acceso externo
 PORT = 8080
@@ -60,6 +88,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                     "swap_total": swap_total.group(1) if swap_total else "0M",
                     "swap_usage": swap_percent,
                     "temp": round(temp_val, 1),
+                    "audio_level": audio_level,
                     "status": "HOT" if temp_val > 65 else ("STABLE" if temp_val > 45 else "COOL")
                 }
             except Exception as e:

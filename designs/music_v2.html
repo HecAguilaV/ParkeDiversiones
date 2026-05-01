@@ -246,49 +246,16 @@
 
         for(let i=0; i<25; i++) runners.push(new IntegratedRunner());
 
-        const debugHud = document.getElementById('debug-hud');
+        let serverAudioLevel = 0;
 
         async function initAudio() {
-            if (isAudioReady) return;
-            debugHud.textContent = "MIC: REQUESTING...";
-            debugHud.style.color = "#ffaa00";
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-                source.connect(analyser);
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-                isAudioReady = true;
-                debugHud.textContent = "MIC: ACTIVE 🔊";
-                debugHud.style.color = "#00ffff";
-            } catch (e) {
-                debugHud.textContent = `ERR: ${e.name}`;
-                debugHud.style.color = "#ff0033";
-            }
+            isAudioReady = true;
+            debugHud.textContent = "SERVER AUDIO: ACTIVE 📡";
+            debugHud.style.color = "#00ffff";
         }
 
-        // Intento persistente de despertar el audio
-        function autoWakeAudio() {
-            if (!isAudioReady) {
-                initAudio();
-            } else if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    if (audioContext.state === 'running') {
-                        debugHud.textContent = "MIC: RUNNING ⚡";
-                    }
-                });
-            }
-        }
-
-        window.addEventListener('mousedown', initAudio);
-        window.addEventListener('mousemove', initAudio, { once: true });
-        window.addEventListener('touchstart', initAudio);
-        
-        // Bucle agresivo de diagnóstico
-        setInterval(autoWakeAudio, 2000);
+        // El audio ahora viene del servidor, no necesitamos disparadores de clic
+        initAudio();
 
         async function updateStats() {
             try {
@@ -335,6 +302,14 @@
                 const usedSsd = (parseFloat(data.ssd_total) - parseFloat(data.ssd_free)).toFixed(1) + 'G';
                 document.getElementById('ssd-val').textContent = `${usedSsd} / ${totalSsd}`;
                 document.getElementById('ssd-bar').style.width = `${data.ssd_usage}%`;
+
+                // Audio del Servidor (Simular espectro)
+                serverAudioLevel = data.audio_level;
+                if (!dataArray) dataArray = new Uint8Array(60);
+                for(let i=0; i<60; i++) {
+                    // Crear un efecto de rebote orgánico basado en el volumen total
+                    dataArray[i] = Math.min(255, serverAudioLevel * (0.8 + Math.random() * 0.4));
+                }
                 
             } catch (e) {}
         }
@@ -379,8 +354,7 @@
 
         function drawVisualizer() {
             vizCtx.clearRect(0, 0, 450, 450);
-            if (!isAudioReady) return;
-            analyser.getByteFrequencyData(dataArray);
+            if (!isAudioReady || !dataArray) return;
             const centerX = 225; const centerY = 225; const radius = 120; const bars = 60;
             for (let i = 0; i < bars; i++) {
                 const barHeight = (dataArray[i] / 255) * 80;

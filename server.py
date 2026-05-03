@@ -4,37 +4,11 @@ import json
 import os
 import re
 import threading
-import pyaudio
 import struct
 import subprocess
 import time
 
-# Configuración de Audio
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 44100
-audio_level = 0
-
-def audio_capture_thread():
-    global audio_level
-    p = pyaudio.PyAudio()
-    try:
-        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
-        while True:
-            data = stream.read(CHUNK, exception_on_overflow=False)
-            if data:
-                count = len(data) // 2
-                shorts = struct.unpack("%dh" % count, data)
-                sum_squares = sum(s**2 for s in shorts)
-                audio_level = int((sum_squares / max(1, count))**0.5)
-    except Exception as e:
-        pass
-    finally:
-        p.terminate()
-
-threading.Thread(target=audio_capture_thread, daemon=True).start()
-
+# Cache de estadísticas para reducir carga de CPU
 stats_cache = {}
 last_update = 0
 CACHE_TTL = 2
@@ -52,13 +26,11 @@ def get_system_stats():
         for line in vm_output.split('\n'):
             if ':' in line and not line.startswith('Mach'):
                 key, val = line.split(':')
-                # Limpiar valor (quitar puntos de miles y espacios)
                 clean_val = val.strip().replace('.', '').replace(' ', '')
                 if clean_val.isdigit():
                     vm_dict[key.strip()] = int(clean_val)
         
         page_size = 4096
-        # Cálculo: (Active + Wired + Compressor Occupied)
         used_pages = vm_dict.get('Pages active', 0) + vm_dict.get('Pages wired down', 0) + vm_dict.get('Pages occupied by compressor', 0)
         free_pages = vm_dict.get('Pages free', 0) + vm_dict.get('Pages speculative', 0)
         
@@ -95,7 +67,6 @@ def get_system_stats():
             "swap_used": swap_used_str,
             "swap_total": swap_total_str,
             "temp": round(temp_val, 1),
-            "audio_level": audio_level,
             "status": "HOT" if temp_val > 65 else ("STABLE" if temp_val > 45 else "COOL")
         }
         last_update = current_time

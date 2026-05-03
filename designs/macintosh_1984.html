@@ -151,12 +151,6 @@
             transition: transform 0.1s ease-out;
         }
 
-        #audio-status {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 8px;
-            color: rgba(0,0,0,0.4);
         }
     </style>
 </head>
@@ -213,7 +207,7 @@
             </div>
         </div>
 
-        <div id="audio-status">MIC: STANDBY</div>
+        
     </div>
 
     <script>
@@ -255,15 +249,14 @@
                 this.scale = this.baseScale;
             }
 
-            update(audioIntensity) {
+            update() {
                 this.x += this.vx;
                 this.y += this.vy;
 
                 if (this.x < 0 || this.x > window.innerWidth - 64) this.vx *= -1;
                 if (this.y < 0 || this.y > window.innerHeight - 64) this.vy *= -1;
 
-                this.scale = this.baseScale + (audioIntensity * 0.5);
-                this.element.style.transform = `translate(${this.x}px, ${this.y}px) scale(${this.scale})`;
+                this.element.style.transform = `translate(${this.x}px, ${this.y}px) scale(${this.baseScale})`;
             }
         }
 
@@ -299,41 +292,8 @@
         setInterval(updateStats, 2000);
         updateStats();
 
-        // Audio Reactivity
-        let audioLevel = 0;
-        const audioStatus = document.getElementById('audio-status');
-
-        async function initAudio() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(stream);
-                const analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-                source.connect(analyser);
-                const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-                audioStatus.textContent = "MIC: ACTIVE";
-                audioStatus.style.color = "green";
-
-                function checkAudio() {
-                    analyser.getByteFrequencyData(dataArray);
-                    let sum = 0;
-                    for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
-                    audioLevel = (sum / dataArray.length) / 255;
-                    requestAnimationFrame(checkAudio);
-                }
-                checkAudio();
-            } catch (e) {
-                audioStatus.textContent = "MIC: DENIED";
-                audioStatus.style.color = "red";
-            }
-        }
-
-        window.addEventListener('click', initAudio, { once: true });
-
         function animate() {
-            floatingIcons.forEach(icon => icon.update(audioLevel));
+            floatingIcons.forEach(icon => icon.update());
             requestAnimationFrame(animate);
         }
         animate();

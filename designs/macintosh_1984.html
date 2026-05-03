@@ -234,10 +234,12 @@
             `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 30H2L30 2V30Z" fill="black"/><path d="M2 30V2H30L2 30Z" fill="black" fill-opacity="0.5"/><path d="M2 30L16 16L30 30H2Z" fill="black" fill-opacity="0.8"/></svg>`,
             // Windows Retro
             `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="11" height="11" fill="black"/><rect x="17" y="4" width="11" height="11" fill="black"/><rect x="4" y="17" width="11" height="11" fill="black"/><rect x="17" y="17" width="11" height="11" fill="black"/></svg>`,
-            // Emojis
-            `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">👨🏻‍💻</text>`,
-            `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">🎶</text>`,
-            `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">🦅</text>`
+            // Developer SVG (Replaces 👨🏻‍💻)
+            `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 10L4 16L10 22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 10L28 16L22 22" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 6L14 26" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>`,
+            // Music SVG (Replaces 🎶)
+            `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 24V6L24 4V22" stroke="black" stroke-width="2"/><circle cx="7" cy="24" r="3" fill="black"/><circle cx="21" cy="22" r="3" fill="black"/></svg>`,
+            // Eagle SVG (Replaces 🦅)
+            `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12C10 10 16 4 16 4C16 4 22 10 28 12C28 12 24 16 16 16C8 16 4 12 4 12Z" fill="black"/><path d="M16 16L14 22L16 28L18 22L16 16Z" fill="black"/><circle cx="13" cy="10" r="1" fill="white"/><circle cx="19" cy="10" r="1" fill="white"/></svg>`
         ];
 
         const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A55EEF', '#45AAF2'];
@@ -246,12 +248,7 @@
             constructor(content, color) {
                 this.element = document.createElement('div');
                 this.element.className = 'floating-icon';
-
-                if (!content.startsWith('<svg')) {
-                    this.element.innerHTML = `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">${content}</svg>`;
-                } else {
-                    this.element.innerHTML = content;
-                }
+                this.element.innerHTML = content;
 
                 const svgElement = this.element.querySelector('svg');
                 svgElement.style.filter = `drop-shadow(0 0 2px ${color})`;
@@ -260,12 +257,6 @@
                 paths.forEach(p => {
                     if (p.getAttribute('fill') === 'black') p.setAttribute('fill', color);
                     if (p.getAttribute('stroke') === 'black') p.setAttribute('stroke', color);
-                });
-
-                const textElements = svgElement.querySelectorAll('text');
-                textElements.forEach(t => {
-                    t.setAttribute('fill', color);
-                    t.style.textShadow = `0 0 5px ${color}`;
                 });
 
                 document.getElementById('desktop').appendChild(this.element);

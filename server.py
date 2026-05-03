@@ -5,7 +5,9 @@ import os
 import re
 import threading
 import pyaudio
-import numpy as np
+import struct
+import subprocess
+import time
 
 # Configuración de Audio
 CHUNK = 1024
@@ -21,19 +23,87 @@ def audio_capture_thread():
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
         while True:
             data = stream.read(CHUNK, exception_on_overflow=False)
-            audio_data = np.frombuffer(data, dtype=np.int16)
-            # Calcular nivel RMS (volumen)
-            rms = np.sqrt(np.mean(audio_data**2))
-            audio_level = int(rms)
+            if data:
+                count = len(data) // 2
+                shorts = struct.unpack("%dh" % count, data)
+                sum_squares = sum(s**2 for s in shorts)
+                audio_level = int((sum_squares / max(1, count))**0.5)
     except Exception as e:
-        print(f"🎤 Error de Audio: {e}")
+        pass
     finally:
         p.terminate()
 
-# Iniciar captura de audio en segundo plano
 threading.Thread(target=audio_capture_thread, daemon=True).start()
 
-# SEGURIDAD: Escuchar solo en localhost (127.0.0.1) para evitar acceso externo
+stats_cache = {}
+last_update = 0
+CACHE_TTL = 2
+
+def get_system_stats():
+    global stats_cache, last_update
+    current_time = time.time()
+    if current_time - last_update < CACHE_TTL and stats_cache:
+        return stats_cache
+
+    try:
+        # MEMORIA (/usr/bin/vm_stat)
+        vm_output = subprocess.check_output("/usr/bin/vm_stat", shell=True).decode()
+        vm_dict = {}
+        for line in vm_output.split('\n'):
+            if ':' in line and not line.startswith('Mach'):
+                key, val = line.split(':')
+                # Limpiar valor (quitar puntos de miles y espacios)
+                clean_val = val.strip().replace('.', '').replace(' ', '')
+                if clean_val.isdigit():
+                    vm_dict[key.strip()] = int(clean_val)
+        
+        page_size = 4096
+        # Cálculo: (Active + Wired + Compressor Occupied)
+        used_pages = vm_dict.get('Pages active', 0) + vm_dict.get('Pages wired down', 0) + vm_dict.get('Pages occupied by compressor', 0)
+        free_pages = vm_dict.get('Pages free', 0) + vm_dict.get('Pages speculative', 0)
+        
+        used_mem_gb = used_pages * page_size / (1024**3)
+        free_mem_gb = free_pages * page_size / (1024**3)
+        
+        # CPU
+        load1, _, _ = os.getloadavg()
+        cpu_count = os.cpu_count() or 1
+        cpu_val = min(100.0, (load1 / cpu_count) * 100.0)
+
+        # SSD (/bin/df)
+        ssd_output = subprocess.check_output("/bin/df -h / | tail -1", shell=True).decode().split()
+        ssd_total = ssd_output[1]
+        ssd_free = ssd_output[3]
+        ssd_percent = ssd_output[4].replace('%', '')
+
+        # SWAP (/usr/sbin/sysctl)
+        swap_output = subprocess.check_output("/usr/sbin/sysctl vm.swapusage", shell=True).decode()
+        swap_total_match = re.search(r'total = (\d+\.\d+M)', swap_output)
+        swap_used_match = re.search(r'used = (\d+\.\d+M)', swap_output)
+        swap_total_str = swap_total_match.group(1) if swap_total_match else "0M"
+        swap_used_str = swap_used_match.group(1) if swap_used_match else "0M"
+        
+        temp_val = 38 + (cpu_val * 0.45)
+        
+        stats_cache = {
+            "used_mem": f"{used_mem_gb:.1f}G",
+            "free_mem": f"{free_mem_gb:.1f}G",
+            "cpu_usage": round(cpu_val, 1),
+            "ssd_free": ssd_free,
+            "ssd_total": ssd_total,
+            "ssd_usage": ssd_percent,
+            "swap_used": swap_used_str,
+            "swap_total": swap_total_str,
+            "temp": round(temp_val, 1),
+            "audio_level": audio_level,
+            "status": "HOT" if temp_val > 65 else ("STABLE" if temp_val > 45 else "COOL")
+        }
+        last_update = current_time
+        return stats_cache
+    except Exception as e:
+        print(f"❌ Error obteniendo stats: {e}")
+        return {"used_mem": "Err", "free_mem": "Err", "cpu_usage": 0, "status": "OFFLINE"}
+
 PORT = 8080
 HOST = "127.0.0.1"
 
@@ -44,66 +114,15 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            
-            try:
-                # Memoria avanzada en macOS
-                mem_cmd = "top -l 1 -n 0 | grep PhysMem"
-                mem_output = subprocess.check_output(mem_cmd, shell=True).decode()
-                unused = re.search(r'(\d+[MG]) unused', mem_output)
-                used = re.search(r'(\d+[MG]) used', mem_output)
-                
-                # CPU
-                cpu_cmd = "top -l 1 -n 0 | grep 'CPU usage'"
-                cpu_output = subprocess.check_output(cpu_cmd, shell=True).decode()
-                cpu_match = re.search(r'(\d+\.\d+)% user', cpu_output)
-                cpu_val = float(cpu_match.group(1)) if cpu_match else 0.0
-
-                # SSD (Disco Principal)
-                ssd_cmd = "df -h / | tail -1"
-                ssd_output = subprocess.check_output(ssd_cmd, shell=True).decode().split()
-                ssd_total = ssd_output[1]
-                ssd_free = ssd_output[3]
-                ssd_percent = ssd_output[4].replace('%', '')
-
-                # SWAP
-                swap_cmd = "sysctl vm.swapusage"
-                swap_output = subprocess.check_output(swap_cmd, shell=True).decode()
-                swap_total = re.search(r'total = (\d+\.\d+M)', swap_output)
-                swap_used = re.search(r'used = (\d+\.\d+M)', swap_output)
-                swap_total_val = float(swap_total.group(1)[:-1]) if swap_total else 1.0
-                swap_used_val = float(swap_used.group(1)[:-1]) if swap_used else 0.0
-                swap_percent = (swap_used_val / swap_total_val) * 100
-
-                # Temperatura Estimada
-                temp_val = 38 + (cpu_val * 0.45)
-                
-                stats = {
-                    "used_mem": used.group(1) if used else "0G",
-                    "free_mem": unused.group(1) if unused else "0G",
-                    "cpu_usage": cpu_val,
-                    "ssd_free": ssd_free,
-                    "ssd_total": ssd_total,
-                    "ssd_usage": ssd_percent,
-                    "swap_used": swap_used.group(1) if swap_used else "0M",
-                    "swap_total": swap_total.group(1) if swap_total else "0M",
-                    "swap_usage": swap_percent,
-                    "temp": round(temp_val, 1),
-                    "audio_level": audio_level,
-                    "status": "HOT" if temp_val > 65 else ("STABLE" if temp_val > 45 else "COOL")
-                }
-            except Exception as e:
-                stats = {"used_mem": "Err", "free_mem": "Err", "cpu_usage": 0, "status": "OFFLINE"}
-                
+            stats = get_system_stats()
             self.wfile.write(json.dumps(stats).encode())
         else:
             super().do_GET()
 
-# Detectar la carpeta donde está el script para servir archivos desde ahí
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)
 
 socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer((HOST, PORT), MyHandler) as httpd:
-    print(f"🚀 SymbiOSis Engine activo en {HOST}:{PORT}")
-    print(f"📁 Sirviendo archivos desde: {BASE_DIR}")
+    print(f"🚀 SymbiOSis Engine OPTIMIZADO activo en {HOST}:{PORT}")
     httpd.serve_forever()

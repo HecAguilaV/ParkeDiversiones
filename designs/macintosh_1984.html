@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Hector's Macintosh 1984</title>
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #72a0a0; /* Classic muted teal/grey */
+            --bg-color: #72a0a0;
+            /* Classic muted teal/grey */
             --mac-border: #000;
             --mac-window-bg: #fff;
             --mac-title-bg: #fff;
@@ -18,7 +20,8 @@
             image-rendering: pixelated;
         }
 
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -34,7 +37,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
@@ -47,7 +50,7 @@
             width: 380px;
             background: var(--mac-window-bg);
             border: 2px solid var(--mac-border);
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
             z-index: 100;
         }
 
@@ -58,13 +61,11 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            background: repeating-linear-gradient(
-                0deg,
-                #fff,
-                #fff 2px,
-                #000 2px,
-                #000 4px
-            );
+            background: repeating-linear-gradient(0deg,
+                    #fff,
+                    #fff 2px,
+                    #000 2px,
+                    #000 4px);
         }
 
         .title-text {
@@ -147,17 +148,16 @@
             height: 64px;
             pointer-events: none;
             z-index: 10;
-            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.1));
+            filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
             transition: transform 0.1s ease-out;
-        }
-
         }
     </style>
 </head>
+
 <body>
     <div class="desktop" id="desktop">
         <!-- Floating Icons will be injected here -->
-        
+
         <div class="window">
             <div class="title-bar">
                 <div class="close-box"></div>
@@ -166,10 +166,10 @@
             <div class="window-content">
                 <div class="info-row">
                     <svg class="mac-icon-small" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="4" y="4" width="24" height="20" stroke="black" stroke-width="2"/>
-                        <rect x="6" y="6" width="20" height="12" fill="black"/>
-                        <rect x="4" y="24" width="24" height="4" stroke="black" stroke-width="2"/>
-                        <rect x="12" y="25" width="8" height="1" fill="black"/>
+                        <rect x="4" y="4" width="24" height="20" stroke="black" stroke-width="2" />
+                        <rect x="6" y="6" width="20" height="12" fill="black" />
+                        <rect x="4" y="24" width="24" height="4" stroke="black" stroke-width="2" />
+                        <rect x="12" y="25" width="8" height="1" fill="black" />
                     </svg>
                     <div class="system-info">
                         <h2>Macintosh II</h2>
@@ -182,21 +182,27 @@
                         <span>CPU Load:</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span id="cpu-val">0%</span>
-                            <div class="stat-bar-bg"><div id="cpu-bar" class="stat-bar-fill"></div></div>
+                            <div class="stat-bar-bg">
+                                <div id="cpu-bar" class="stat-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-item">
                         <span>Memory:</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span id="ram-val">0 / 0</span>
-                            <div class="stat-bar-bg"><div id="ram-bar" class="stat-bar-fill"></div></div>
+                            <div class="stat-bar-bg">
+                                <div id="ram-bar" class="stat-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-item">
                         <span>Disk:</span>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span id="ssd-val">0 / 0</span>
-                            <div class="stat-bar-bg"><div id="ssd-bar" class="stat-bar-fill"></div></div>
+                            <div class="stat-bar-bg">
+                                <div id="ssd-bar" class="stat-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-item">
@@ -207,7 +213,7 @@
             </div>
         </div>
 
-        
+
     </div>
 
     <script>
@@ -229,7 +235,7 @@
                 this.element = document.createElement('div');
                 this.element.className = 'floating-icon';
                 this.element.innerHTML = svg;
-                
+
                 // Set initial color
                 const svgElement = this.element.querySelector('svg');
                 svgElement.style.filter = `drop-shadow(0 0 2px ${color})`;
@@ -263,7 +269,7 @@
         const floatingIcons = [];
         for (let i = 0; i < 12; i++) {
             floatingIcons.push(new FloatingIcon(
-                icons[i % icons.length], 
+                icons[i % icons.length],
                 colors[Math.floor(Math.random() * colors.length)]
             ));
         }
@@ -273,17 +279,17 @@
             try {
                 const res = await fetch('http://localhost:8080/stats');
                 const data = await res.json();
-                
+
                 document.getElementById('cpu-val').textContent = `${data.cpu_usage.toFixed(1)}%`;
                 document.getElementById('cpu-bar').style.width = `${data.cpu_usage}%`;
-                
+
                 document.getElementById('ram-val').textContent = `${data.used_mem} / ${(parseFloat(data.used_mem) + parseFloat(data.free_mem)).toFixed(1)}G`;
                 let ramPercent = (parseFloat(data.used_mem) / (parseFloat(data.used_mem) + parseFloat(data.free_mem))) * 100;
                 document.getElementById('ram-bar').style.width = `${ramPercent}%`;
 
                 document.getElementById('ssd-val').textContent = `${(parseFloat(data.ssd_total) - parseFloat(data.ssd_free)).toFixed(1)}G / ${data.ssd_total}`;
                 document.getElementById('ssd-bar').style.width = `${data.ssd_usage}%`;
-                
+
                 document.getElementById('temp-val').textContent = `${data.temp}°C`;
             } catch (e) {
                 console.error("Stats fetch failed", e);
@@ -306,4 +312,5 @@
         });
     </script>
 </body>
+
 </html>
